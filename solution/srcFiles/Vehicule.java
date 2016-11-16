@@ -5,6 +5,6 @@ package srcFiles;
  */
 public class Vehicule {
     public Boolean occupation; //s'il y a quelqu'un dedans
-    public Automate.Node zoneActuelle;
-    public Automate.Node positionActuelle;
+    public Node zoneActuelle;
+    public Node positionActuelle;
 }
