@@ -1,5 +1,6 @@
 package srcFiles;
 
+import com.sun.org.apache.xpath.internal.SourceTree;
 import com.sun.xml.internal.ws.policy.privateutil.PolicyUtils;
 
 import java.io.FileReader;
@@ -7,6 +8,8 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.InputMismatchException;
+import java.util.Scanner;
 import java.util.stream.Stream;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -21,6 +24,10 @@ public class Gestionnaire {
     public Gestionnaire(){
         carte = new Carte();
     }
+
+    //constante taille maximale INT, nombre maximal de passager et de véhicules qu'il est possible d'avoir à la fois
+    int MAXINT=2147483647;
+
 
     //C1. Ecrire une fonction ”creerLexiques()” qui permet de lire
     //les fichiers textes correspondants aux zones des v´ehicules.
@@ -103,6 +110,7 @@ public class Gestionnaire {
                 break;
             case EntrerClientsEtVehicules:
                 //TODO:
+                entrerClientsEtVehicules();
                 break;
             case DemarrerSimulation:
                 //TODO:
@@ -128,6 +136,8 @@ public class Gestionnaire {
         //option(d) permet de quitter
         return true;
     }
+
+
 
     private void afficherOptionsDuMenu() {
         System.out.println("\nSélectionnez une option parmi les suivantes : ");
@@ -178,4 +188,85 @@ public class Gestionnaire {
             //TODO: Avertir usager
         }*/
     }
+
+    private void entrerClientsEtVehicules() {
+        int numGroupe,nombrePassagers, nombreVehicules=0;
+        String mode="",depart, destination,zoneDepartVehicule="";
+        Scanner reader = new Scanner(System.in);
+
+        System.out.println("Sélectionnez le mode d'entrée des données, entrez ''m'' pour saisie manuelle, ou ''f'' pour saisie à l'aide d'un fichier");
+
+
+        try{
+            mode=reader.nextLine();
+            System.out.println(mode);
+        }catch(InputMismatchException e){
+            System.out.println("Sélectionnez un mode de saisie de données, ''m'' pour une saisie manuelle, ''f'' pour saisie à partir d'un fichier");
+        }
+
+        if(mode.equals("m") || mode.equals("M")){
+
+            try{
+                System.out.println("Entrez le point de départ:");
+                depart=reader.nextLine(); //TODO: faire validation bon type de données selon les données attendues, type inconnu pour le moment
+                System.out.println(depart);
+            }catch(InputMismatchException e){
+                System.out.println("Entrez un point de départ valide");
+            }
+
+
+            try{
+                System.out.println("Entrez le point de destination:");
+                destination=reader.nextLine(); //TODO: faire validation bon type de données selon les données attendues, type inconnu pour le moment
+                System.out.println(destination);
+            }catch(InputMismatchException e){
+                System.out.println("Entrez un point de destination valide");
+            }
+
+
+            try{
+                System.out.println("Entrez un numéro de groupe:");
+                numGroupe= reader.nextInt(); //TODO: validation s'assurer que l'utilisteur n'entre pas un string
+                System.out.println(numGroupe);
+            }catch(InputMismatchException e){
+                System.out.println("Entrez un entier compris entre 0 et "+MAXINT+" comme numéro de groupe");
+            }
+
+
+            try{
+                System.out.println("Entrez une zone de départ");
+                zoneDepartVehicule=reader.nextLine(); //TODO: faire validation bon type de données selon les données attendues, type inconnu pour le moment
+                System.out.println(zoneDepartVehicule);
+                //reader.nextInt();
+            }catch(InputMismatchException e){
+                System.out.println("Entrez une zonde de départ");
+            }
+
+
+            try{
+                System.out.println("Entrez le nombre de passagers:");
+                nombrePassagers=reader.nextInt(); //TODO: empecher l'utilisateur d'entrer des string a la place d'entiers
+                System.out.println(nombrePassagers);
+            }catch(InputMismatchException e){
+                System.out.println("Entrez un entier compris entre 0 et "+MAXINT+" comme nombre de passagers");
+            }
+
+            try{
+                System.out.println("Entrez le nombre de véhicules:");
+                nombreVehicules=reader.nextInt();
+                System.out.println(nombreVehicules);
+                //reader.nextInt();
+            }catch(InputMismatchException e){
+            System.out.println("Entrez un entier compris entre 0 et "+MAXINT+" comme nombre de passagers");
+        }
+
+
+        }else if(mode.equals("f")|| mode.equals("F")){
+
+        }else{
+            System.out.println("Sélectionnez un mode de saisie de données, ''m'' pour une saisie manuelle, ''f'' pour saisie à partir d'un fichier");
+        }
+    }
+
+
 }
