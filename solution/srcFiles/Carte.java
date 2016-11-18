@@ -183,6 +183,54 @@ public class Carte {
         return vehiculesDansZone.get(generator.nextInt(vehiculesDansZone.size()));
     }
 
-    //private void transfererVehicules(int indexDepart, int indexDestination, int nombreDeVehicules) {
-    //}
+    private Vehicule getVehiculeLibreDansNode(Node node){
+        for (Vehicule vehicule : vehicules){
+            if (vehicule.getPositionActuelle().equals(node) && vehicule.peutAccueillirPassagers(1))
+                return vehicule;
+        }
+        return null;
+    }
+
+    public ArrayList<Utilisateur> getUtilisateursDuGroupe(Integer numeroDeGroupe){
+        ArrayList<Utilisateur> utilisateurs = new ArrayList<>();
+        for (Utilisateur utilisateur : this.utilisateurs){
+            if (utilisateur.getNumeroDeGroupe().equals(numeroDeGroupe))
+                utilisateurs.add(utilisateur);
+        }
+        return utilisateurs;
+    }
+
+    public void deplacerUtilisateur(Utilisateur utilisateur){
+        Vehicule taxi = getVehiculeLePlusProche(utilisateur.getOrigine());
+        if (taxi != null){
+            taxi.setOccupation(true);
+            taxi.setPositionActuelle(utilisateur.getDestination());
+            taxi.setZoneActuelle(getZoneDeNode(utilisateur.getDestination()));
+            taxi.setNombreDePassagers(taxi.getNombreDePassagers() + 1);
+        }
+        //TODO:
+        int i = 0;
+    }
+
+    private Vehicule getVehiculeLePlusProche(Node node){
+        Vehicule vehicule = getVehiculeLibreDansNode(node);
+        if (vehicule == null)
+            vehicule = getVehiculeLibreDansLaZone(getZoneDeNode(node));
+        return vehicule;
+    }
+
+    private Vehicule getVehiculeLibreDansLaZone(Automate zone){
+        for (Vehicule vehicule : vehicules){
+            if (vehicule.getZoneActuelle().equals(zone) && vehicule.peutAccueillirPassagers(1))
+                return vehicule;
+        }
+        return null;
+    }
+
+    public void remettreVehiculesDisponibles(){
+        for (Vehicule vehicule : vehicules){
+            vehicule.setNombreDePassagers(0);
+            vehicule.setOccupation(false);
+        }
+    }
 }

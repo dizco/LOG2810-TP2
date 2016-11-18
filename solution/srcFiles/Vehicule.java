@@ -1,7 +1,5 @@
 package srcFiles;
 
-import com.sun.javaws.exceptions.InvalidArgumentException;
-
 /**
  * Created by Gabriel Bourgault on 2016-11-15.
  */
@@ -11,14 +9,16 @@ public class Vehicule {
     private Node positionActuelle;
 
     private Integer nombreDePassagers;
-    private Integer nombreDePlacesDisponibles;
+    private Integer nombreDePlacesTotales;
 
     public Vehicule(){};
 
-    public Vehicule(boolean occupation, Automate zoneActuelle, Node positionActuelle){
+    public Vehicule(boolean occupation, Automate zoneActuelle, Node positionActuelle, Integer nombreDePassagers, Integer nombreDePlacesTotales){
         this.occupation = occupation;
         this.zoneActuelle = zoneActuelle;
         this.positionActuelle = positionActuelle;
+        this.nombreDePassagers = nombreDePassagers;
+        this.nombreDePlacesTotales = nombreDePlacesTotales;
     }
 
     public boolean estOccupe() {
@@ -37,8 +37,8 @@ public class Vehicule {
         return nombreDePassagers;
     }
 
-    public Integer getNombreDePlacesDisponibles() {
-        return nombreDePlacesDisponibles;
+    public Integer getNombreDePlacesTotales() {
+        return nombreDePlacesTotales;
     }
 
     public void setOccupation(boolean occupation) {
@@ -54,12 +54,18 @@ public class Vehicule {
     }
 
     public void setNombreDePassagers(Integer nombreDePassagers) {
-        if (nombreDePassagers > nombreDePlacesDisponibles)
-            throw new IllegalArgumentException("Le nombre de passagers ne peut être supérieur au nombre de places disponibles.");
+        if (nombreDePassagers > nombreDePlacesTotales)
+            throw new IllegalArgumentException("Le nombre de passagers ne peut être supérieur au nombre de places totales.");
         this.nombreDePassagers = nombreDePassagers;
     }
 
-    public void setNombreDePlacesDisponibles(Integer nombreDePlacesDisponibles) {
-        this.nombreDePlacesDisponibles = nombreDePlacesDisponibles;
+    public void setNombreDePlacesTotales(Integer nombreDePlacesTotales) {
+        if (nombreDePassagers > nombreDePlacesTotales)
+            throw new IllegalArgumentException("Le nombre de passagers ne peut être supérieur au nombre de places totales.");
+        this.nombreDePlacesTotales = nombreDePlacesTotales;
+    }
+
+    public boolean peutAccueillirPassagers(Integer nombreDePassagers){
+        return !estOccupe() && (this.nombreDePlacesTotales >= nombreDePassagers);
     }
 }

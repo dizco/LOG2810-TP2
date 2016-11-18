@@ -8,6 +8,14 @@ public class Utilisateur {
     private Node destination;
     private Integer numeroDeGroupe;
 
+    public Utilisateur() {}
+
+    public Utilisateur(Node origine, Node destination, Integer numeroDeGroupe){
+        this.origine = origine;
+        this.destination = destination;
+        this.numeroDeGroupe = numeroDeGroupe;
+    }
+
     public Node getOrigine(){
         return origine;
     }
