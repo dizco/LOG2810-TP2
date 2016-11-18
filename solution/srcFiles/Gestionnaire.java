@@ -193,6 +193,8 @@ public class Gestionnaire {
         int numGroupe,nombrePassagers, nombreVehicules=0;
         String mode="",depart, destination,zoneDepartVehicule="";
         Scanner reader = new Scanner(System.in);
+        String regexPostalCode = "^[A-Z][0-9][A-Z] ?[0-9][A-Z][0-9]$";
+
 
         System.out.println("Sélectionnez le mode d'entrée des données, entrez ''m'' pour saisie manuelle, ou ''f'' pour saisie à l'aide d'un fichier");
 
@@ -206,60 +208,105 @@ public class Gestionnaire {
 
         if(mode.equals("m") || mode.equals("M")){
 
-            try{
-                System.out.println("Entrez le point de départ:");
-                depart=reader.nextLine(); //TODO: faire validation bon type de données selon les données attendues, type inconnu pour le moment
-                System.out.println(depart);
-            }catch(InputMismatchException e){
-                System.out.println("Entrez un point de départ valide");
+                //On demande tout d'abord à l'utilisateur d'entrer le code postal de son point de départ
+                boolean departIsValide=false;
+                while(!departIsValide){
+                    System.out.println("Entrez le code postal du point de départ:");
+                    depart=reader.nextLine();
+                    System.out.println(depart);
+                    if(!depart.toUpperCase().matches(regexPostalCode)){ //on valide avec un regex que l'utilisateur entre un code postal valide constitué de chiffres et lettres en alternance
+                        System.out.println("Entrez un code postal de départ valide");
+                    }else{
+                        departIsValide=true;
+                    }
+                }
+
+                //On demande ensuite à l'utilisateur d'entrer le code postal de destination
+                boolean destinationIsValide=false;
+                while(!destinationIsValide){
+                    System.out.println("Entrez le code postal du point de destination:");
+                    destination=reader.nextLine();
+                    System.out.println(destination);
+                    if(!destination.toUpperCase().matches(regexPostalCode)){
+                        System.out.println("Entrez un code postal de destination valide");
+                    }else{
+                        destinationIsValide=true;
+                    }
+                }
+
+
+            //On demande à l'utilisateur d'entrer son numéro de groupe, on s'assure que le numéro de groupe correspond à un entier
+            boolean numGroupeIsValide=false;
+            while(!numGroupeIsValide){
+                   try{
+                       System.out.println("Entrez un numéro de groupe:");
+                       numGroupe=reader.nextInt();
+                       System.out.println(numGroupe);
+                       if(numGroupe>0 && numGroupe<MAXINT){
+                           numGroupeIsValide=true;
+                       }else{
+                           System.out.println("Entrez un numéro de groupe valide");
+                       }
+                   }catch(InputMismatchException e){
+                       System.out.println("Entrez un numéro de groupe valide");
+                       reader.nextLine();
+                   }
+
+            }
+
+            //On demande une zonde de départ valide pour le véhicule et on s'assure qu'elle correspond à un code postal
+            boolean zoneDepartIsValide=false;
+            while(!zoneDepartIsValide){
+                    System.out.println("Entrez la zone de départ du véhicule");
+                    zoneDepartVehicule=reader.nextLine();
+                    System.out.println(zoneDepartVehicule);
+                if(!zoneDepartVehicule.toUpperCase().matches(regexPostalCode)){
+                    System.out.println("Entrez une code postal de zone de départ du véhicule valide");
+                }else{
+                    zoneDepartIsValide=true;
+                }
+
+            }
+
+            //On demande à l'utilisateur d'entrer le nombre de passagers, on s'assure qu'il correspond à un entier
+            boolean nombrePassagersIsValide=false;
+            while(!nombrePassagersIsValide){
+                try{
+                    System.out.println("Entrez le nombre de passagers:");
+                    nombrePassagers=reader.nextInt();
+                    System.out.println(nombrePassagers);
+                    if(nombrePassagers>0 && nombrePassagers<MAXINT){
+                       nombrePassagersIsValide=true;
+                    }else{
+                        System.out.println("Entrez un nombre de passagers valide");
+                    }
+                }catch(InputMismatchException e){
+                    System.out.println("Entrez un nombre de passagers valide");
+                    reader.nextLine();
+                }
+
             }
 
 
-            try{
-                System.out.println("Entrez le point de destination:");
-                destination=reader.nextLine(); //TODO: faire validation bon type de données selon les données attendues, type inconnu pour le moment
-                System.out.println(destination);
-            }catch(InputMismatchException e){
-                System.out.println("Entrez un point de destination valide");
+            //On demande à l'utilisateur d'entrer le nombre de véhicules, on s'assure qu'il correspond à un entier
+            boolean nombreVehiculesIsValide=false;
+            while(!nombreVehiculesIsValide){
+                try{
+                    System.out.println("Entrez le nombre de véchicules désiré:");
+                    nombreVehicules=reader.nextInt();
+                    System.out.println(nombreVehicules);
+                    if(nombreVehicules>0 && nombreVehicules<MAXINT){
+                        nombreVehiculesIsValide=true;
+                    }else{
+                        System.out.println("Entrez un nombre de véhicules valide");
+
+                    }
+                }catch(InputMismatchException e){
+                    System.out.println("Entrez un nombre de véhicules valide");
+                    reader.nextLine();
+                }
+
             }
-
-
-            try{
-                System.out.println("Entrez un numéro de groupe:");
-                numGroupe= reader.nextInt(); //TODO: validation s'assurer que l'utilisteur n'entre pas un string
-                System.out.println(numGroupe);
-            }catch(InputMismatchException e){
-                System.out.println("Entrez un entier compris entre 0 et "+MAXINT+" comme numéro de groupe");
-            }
-
-
-            try{
-                System.out.println("Entrez une zone de départ");
-                zoneDepartVehicule=reader.nextLine(); //TODO: faire validation bon type de données selon les données attendues, type inconnu pour le moment
-                System.out.println(zoneDepartVehicule);
-                //reader.nextInt();
-            }catch(InputMismatchException e){
-                System.out.println("Entrez une zonde de départ");
-            }
-
-
-            try{
-                System.out.println("Entrez le nombre de passagers:");
-                nombrePassagers=reader.nextInt(); //TODO: empecher l'utilisateur d'entrer des string a la place d'entiers
-                System.out.println(nombrePassagers);
-            }catch(InputMismatchException e){
-                System.out.println("Entrez un entier compris entre 0 et "+MAXINT+" comme nombre de passagers");
-            }
-
-            try{
-                System.out.println("Entrez le nombre de véhicules:");
-                nombreVehicules=reader.nextInt();
-                System.out.println(nombreVehicules);
-                //reader.nextInt();
-            }catch(InputMismatchException e){
-            System.out.println("Entrez un entier compris entre 0 et "+MAXINT+" comme nombre de passagers");
-        }
-
 
         }else if(mode.equals("f")|| mode.equals("F")){
 
