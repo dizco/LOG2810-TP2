@@ -46,6 +46,20 @@ public class Carte {
         return null;
     }
 
+    public Automate getZoneDeNode(Node node){
+        if (node != null){
+            Node temp = node;
+            while (temp.getParent() != null)
+                temp = temp.getParent();
+
+            for (Automate zone : zones){
+                if (zone.getRoot().equals(temp))
+                    return zone;
+            }
+        }
+        return null;
+    }
+
     public void equilibrerZones(){
         ArrayList<Integer> nombreDeVehicules = new ArrayList<>();
         int premierNombre = 0;

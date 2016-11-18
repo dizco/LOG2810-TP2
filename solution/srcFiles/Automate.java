@@ -6,9 +6,7 @@ package srcFiles;
 public class Automate {
     private Node root;
 
-    public Automate(){
-        //root = new Node();
-    }
+    public Automate(){}
 
     public void ajouter(String nom){
         String cleanNom = nom.replaceAll("\\s","");
@@ -24,5 +22,9 @@ public class Automate {
 
     public Node getDestinationRandom(){
         return root.getEnfantRandom();
+    }
+
+    public Node getRoot(){
+        return root;
     }
 }
