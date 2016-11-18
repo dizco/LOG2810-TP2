@@ -11,10 +11,18 @@ public class Automate {
     }
 
     public void ajouter(String nom){
-        //TODO: Inserer un noeud dans l'automate
         String cleanNom = nom.replaceAll("\\s","");
         if (root == null)
             root = new Node(cleanNom.substring(0, 1));
         root.ajouterEnfant(cleanNom);
+    }
+
+    public Node getNodeExistante(String nom) {
+        String cleanNom = nom.replaceAll("\\s","");
+        return root.getNodeExistante(nom);
+    }
+
+    public Node getDestinationRandom(){
+        return root.getEnfantRandom();
     }
 }

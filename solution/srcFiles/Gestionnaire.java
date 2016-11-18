@@ -84,7 +84,21 @@ public class Gestionnaire {
     //le nombre de v´ehicules pour chaque zone.
     public void equilibrerFlotte(){
         //aucun paramètre a priori
+        Vehicule vehicule1 = new Vehicule(false, carte.getZones().get(0), carte.getZones().get(0).getDestinationRandom());
+        Vehicule vehicule2 = new Vehicule(false, carte.getZones().get(0), carte.getZones().get(0).getDestinationRandom());
+        Vehicule vehicule3 = new Vehicule(false, carte.getZones().get(2), carte.getZones().get(2).getDestinationRandom());
+        Vehicule vehicule4 = new Vehicule(false, carte.getZones().get(2), carte.getZones().get(2).getDestinationRandom());
+        Vehicule vehicule5 = new Vehicule(false, carte.getZones().get(2), carte.getZones().get(2).getDestinationRandom());
 
+        carte.ajouterVehicule(vehicule1);
+        carte.ajouterVehicule(vehicule2);
+        carte.ajouterVehicule(vehicule3);
+        carte.ajouterVehicule(vehicule4);
+        carte.ajouterVehicule(vehicule5);
+
+        Node test = carte.getNodeExistante("H1B1R3");
+
+        carte.equilibrerZones();
     }
 
     //C3. Ecrire une fonction ”lancerSimulation()” qui d´emarre la simulation  ´
@@ -109,11 +123,10 @@ public class Gestionnaire {
                 creerZones();
                 break;
             case EntrerClientsEtVehicules:
-                //TODO:
                 entrerClientsEtVehicules();
                 break;
             case DemarrerSimulation:
-                //TODO:
+                equilibrerFlotte();
                 break;
             case Quitter:
                 System.out.println("Au revoir.");

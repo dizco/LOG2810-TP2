@@ -1,6 +1,7 @@
 package srcFiles;
 
 import java.util.ArrayList;
+import java.util.Random;
 
 /**
  * Created by Gabriel Bourgault on 2016-11-16.
@@ -30,6 +31,14 @@ public class Node {
                 return enfant;
         }
         return null;
+    }
+
+    public Node getEnfantRandom(){
+        if (enfants.size() == 0)
+            return this; //on a affaire avec un noeud final
+
+        Random generator = new Random(System.nanoTime());
+        return enfants.get(generator.nextInt(enfants.size())).getEnfantRandom();
     }
 
     public Node getParent(){
@@ -65,6 +74,22 @@ public class Node {
     public void ajouterEnfant(Node node) {
         node.setParent(this);
         enfants.add(node);
+    }
+
+    public Node getNodeExistante(String nom){
+        if (this.nom.equals(nom))
+            return this;
+        for (int i = 0; i < this.nom.length(); i++){
+            if (this.nom.charAt(i) != nom.charAt(i))
+                return null;
+        }
+
+        for (Node enfant : enfants){
+            Node resultat = enfant.getNodeExistante(nom);
+            if (resultat != null)
+                return resultat;
+        }
+        return null;
     }
 
 }
