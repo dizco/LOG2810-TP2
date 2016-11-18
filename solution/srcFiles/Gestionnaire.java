@@ -197,11 +197,8 @@ public class Gestionnaire {
 
 
         System.out.println("Sélectionnez le mode d'entrée des données, entrez ''m'' pour saisie manuelle, ou ''f'' pour saisie à l'aide d'un fichier");
-
-
         try{
             mode=reader.nextLine();
-            System.out.println(mode);
         }catch(InputMismatchException e){
             System.out.println("Sélectionnez un mode de saisie de données, ''m'' pour une saisie manuelle, ''f'' pour saisie à partir d'un fichier");
         }
@@ -213,8 +210,7 @@ public class Gestionnaire {
                 while(!departIsValide){
                     System.out.println("Entrez le code postal du point de départ:");
                     depart=reader.nextLine();
-                    System.out.println(depart);
-                    if(!depart.toUpperCase().matches(regexPostalCode)){ //on valide avec un regex que l'utilisateur entre un code postal valide constitué de chiffres et lettres en alternance
+                   if(!depart.toUpperCase().matches(regexPostalCode)){ //on valide avec un regex que l'utilisateur entre un code postal valide constitué de chiffres et lettres en alternance
                         System.out.println("Entrez un code postal de départ valide");
                     }else{
                         departIsValide=true;
@@ -226,7 +222,6 @@ public class Gestionnaire {
                 while(!destinationIsValide){
                     System.out.println("Entrez le code postal du point de destination:");
                     destination=reader.nextLine();
-                    System.out.println(destination);
                     if(!destination.toUpperCase().matches(regexPostalCode)){
                         System.out.println("Entrez un code postal de destination valide");
                     }else{
@@ -241,9 +236,9 @@ public class Gestionnaire {
                    try{
                        System.out.println("Entrez un numéro de groupe:");
                        numGroupe=reader.nextInt();
-                       System.out.println(numGroupe);
-                       if(numGroupe>0 && numGroupe<MAXINT){
+                      if(numGroupe>0 && numGroupe<MAXINT){
                            numGroupeIsValide=true;
+                          reader.nextLine();////////////////////////////////////////
                        }else{
                            System.out.println("Entrez un numéro de groupe valide");
                        }
@@ -259,7 +254,6 @@ public class Gestionnaire {
             while(!zoneDepartIsValide){
                     System.out.println("Entrez la zone de départ du véhicule");
                     zoneDepartVehicule=reader.nextLine();
-                    System.out.println(zoneDepartVehicule);
                 if(!zoneDepartVehicule.toUpperCase().matches(regexPostalCode)){
                     System.out.println("Entrez une code postal de zone de départ du véhicule valide");
                 }else{
@@ -274,7 +268,6 @@ public class Gestionnaire {
                 try{
                     System.out.println("Entrez le nombre de passagers:");
                     nombrePassagers=reader.nextInt();
-                    System.out.println(nombrePassagers);
                     if(nombrePassagers>0 && nombrePassagers<MAXINT){
                        nombrePassagersIsValide=true;
                     }else{
@@ -294,7 +287,6 @@ public class Gestionnaire {
                 try{
                     System.out.println("Entrez le nombre de véchicules désiré:");
                     nombreVehicules=reader.nextInt();
-                    System.out.println(nombreVehicules);
                     if(nombreVehicules>0 && nombreVehicules<MAXINT){
                         nombreVehiculesIsValide=true;
                     }else{
@@ -309,6 +301,7 @@ public class Gestionnaire {
             }
 
         }else if(mode.equals("f")|| mode.equals("F")){
+
 
         }else{
             System.out.println("Sélectionnez un mode de saisie de données, ''m'' pour une saisie manuelle, ''f'' pour saisie à partir d'un fichier");
