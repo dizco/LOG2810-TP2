@@ -81,6 +81,7 @@ public class Carte {
 
     private void repartirLesVehiculesEntreLesZones(ArrayList<Integer> nombreDeVehicules){
         ArrayList<Integer> differentiel = calculerDifferentiel(nombreDeVehicules);
+        CompteurDeDeplacementsSingleton compteurSingleton = CompteurDeDeplacementsSingleton.getInstance();
 
         ArrayList<Vehicule> vehiculesExcedentaires = new ArrayList<>();
         for (int i = 0; i < zones.size(); i++){
@@ -111,6 +112,7 @@ public class Carte {
                 Vehicule v = vehiculesExcedentaires.remove(0);
                 v.setZoneActuelle(zones.get(i));
                 v.setPositionActuelle(zones.get(i).getDestinationRandom());
+                compteurSingleton.augmenterNombreDeDeplacementsAVide();
             }
         }
 
@@ -200,22 +202,44 @@ public class Carte {
         return utilisateurs;
     }
 
-    public void deplacerUtilisateur(Utilisateur utilisateur){
+    public void deplacerUtilisateur(Utilisateur utilisateur) throws NoSuchElementException {
         Vehicule taxi = getVehiculeLePlusProche(utilisateur.getOrigine());
         if (taxi != null){
             taxi.setOccupation(true);
             taxi.setPositionActuelle(utilisateur.getDestination());
             taxi.setZoneActuelle(getZoneDeNode(utilisateur.getDestination()));
             taxi.setNombreDePassagers(taxi.getNombreDePassagers() + 1);
+            CompteurDeDeplacementsSingleton.getInstance().augmenterNombreDeDeplacementsAvecPassagers();
         }
-        //TODO:
-        int i = 0;
+        else {
+            throw new NoSuchElementException("Il n'y a aucun véhicule de disponible pour effectuer le déplacement de "
+                    + utilisateur.getOrigine().getNom() + " vers " + utilisateur.getDestination().getNom() + ".");
+        }
     }
 
     private Vehicule getVehiculeLePlusProche(Node node){
-        Vehicule vehicule = getVehiculeLibreDansNode(node);
-        if (vehicule == null)
+        Vehicule vehicule = getVehiculeLibreDansNode(node); //on commence par chercher dans son quartier
+        if (vehicule == null){
+            //on cherche dans la zone
             vehicule = getVehiculeLibreDansLaZone(getZoneDeNode(node));
+            if (vehicule != null){
+                CompteurDeDeplacementsSingleton.getInstance().augmenterNombreDeDeplacementsAVide();
+            }
+        }
+
+        if (vehicule == null) {
+            //on cherche dans toutes les zones
+            for (Automate zone : zones){
+                if (zone.equals(getZoneDeNode(node)))
+                    continue;
+                vehicule = getVehiculeLibreDansLaZone(zone);
+                if (vehicule != null){
+                    CompteurDeDeplacementsSingleton.getInstance().augmenterNombreDeDeplacementsAVide();
+                    break;
+                }
+            }
+        }
+
         return vehicule;
     }
 

@@ -1,6 +1,7 @@
 package srcFiles;
 
 import com.sun.org.apache.xpath.internal.SourceTree;
+import com.sun.xml.internal.ws.message.Util;
 import com.sun.xml.internal.ws.policy.privateutil.PolicyUtils;
 
 import java.io.FileReader;
@@ -8,7 +9,9 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.InputMismatchException;
+import java.util.NoSuchElementException;
 import java.util.Scanner;
 import java.util.stream.Stream;
 import java.io.BufferedReader;
@@ -27,7 +30,6 @@ public class Gestionnaire {
 
     //constante taille maximale INT, nombre maximal de passager et de véhicules qu'il est possible d'avoir à la fois
     int MAXINT=2147483647;
-
 
     //C1. Ecrire une fonction ”creerLexiques()” qui permet de lire
     //les fichiers textes correspondants aux zones des v´ehicules.
@@ -57,22 +59,15 @@ public class Gestionnaire {
 
     //Voir : http://stackoverflow.com/a/4716623/6316091
     private Automate lireFichier(Path fileName) throws IOException {
-        Automate automate = new Automate();
-        //TODO: lire contenu du fichier et l'entrer dans l'automate correspondant
-
+        Automate automate = new Automate(fileName.toString());
         BufferedReader br = new BufferedReader(new FileReader(fileName.toString()));
         try {
-            StringBuilder sb = new StringBuilder();
             String line = br.readLine();
-
             while (line != null) {
-                sb.append(line);
-                sb.append(System.lineSeparator());
-                line = br.readLine();
-                if (line != null && !line.equals(""))
+                if (!line.equals(""))
                     automate.ajouter(line);
+                line = br.readLine();
             }
-            String everything = sb.toString();
         } finally {
             br.close();
         }
@@ -84,19 +79,9 @@ public class Gestionnaire {
     //le nombre de v´ehicules pour chaque zone.
     public void equilibrerFlotte(){
         //aucun paramètre a priori
-        Vehicule vehicule1 = new Vehicule(false, carte.getZones().get(0), carte.getZones().get(0).getDestinationRandom());
-        Vehicule vehicule2 = new Vehicule(false, carte.getZones().get(0), carte.getZones().get(0).getDestinationRandom());
-        Vehicule vehicule3 = new Vehicule(false, carte.getZones().get(2), carte.getZones().get(2).getDestinationRandom());
-        Vehicule vehicule4 = new Vehicule(false, carte.getZones().get(2), carte.getZones().get(2).getDestinationRandom());
-        Vehicule vehicule5 = new Vehicule(false, carte.getZones().get(2), carte.getZones().get(2).getDestinationRandom());
 
-        carte.ajouterVehicule(vehicule1);
-        carte.ajouterVehicule(vehicule2);
-        carte.ajouterVehicule(vehicule3);
-        carte.ajouterVehicule(vehicule4);
-        carte.ajouterVehicule(vehicule5);
-
-        Node test = carte.getNodeExistante("H1B1R3");
+        //Node test = carte.getNodeExistante("H1B1R3");
+        //Automate zone = carte.getZoneDeNode(test);
 
         carte.equilibrerZones();
     }
@@ -104,8 +89,86 @@ public class Gestionnaire {
     //C3. Ecrire une fonction ”lancerSimulation()” qui d´emarre la simulation  ´
     //une fois que l’utilisateur a rentr´e les donn´ees n´ecessaires.
     public void lancerSimulation() {
-        //peut prendre comme paramètres les données de simulation entrées par l'utilisateurr
+        //peut prendre comme paramètres les données de simulation entrées par l'utilisateur
 
+        /*Vehicule vehicule1 = new Vehicule(false, carte.getZones().get(0), carte.getZones().get(0).getDestinationRandom());
+        Vehicule vehicule2 = new Vehicule(false, carte.getZones().get(0), carte.getZones().get(0).getDestinationRandom());
+        Vehicule vehicule3 = new Vehicule(false, carte.getZones().get(2), carte.getZones().get(2).getDestinationRandom());
+        Vehicule vehicule4 = new Vehicule(false, carte.getZones().get(2), carte.getZones().get(2).getDestinationRandom());
+        Vehicule vehicule5 = new Vehicule(false, carte.getZones().get(2), carte.getZones().get(2).getDestinationRandom());
+*/
+        //Zone1
+        Vehicule vehicule1 = new Vehicule(false, carte.getZoneDeNode(carte.getNodeExistante("H1A0A2")),
+                carte.getNodeExistante("H1A0A2"), 0, 2);
+        //Zone1
+        Vehicule vehicule2 = new Vehicule(false, carte.getZoneDeNode(carte.getNodeExistante("H1A0A2")),
+                carte.getNodeExistante("H1A0A2"), 0, 2);
+        //Zone3
+        Vehicule vehicule3 = new Vehicule(false, carte.getZoneDeNode(carte.getNodeExistante("H1B5M8")),
+                carte.getNodeExistante("H1B5M8"), 0, 2);
+        //Zone3
+        Vehicule vehicule4 = new Vehicule(false, carte.getZoneDeNode(carte.getNodeExistante("H1B5M8")),
+                carte.getNodeExistante("H1B5M8"), 0, 2);
+        //Zone3
+        Vehicule vehicule5 = new Vehicule(false, carte.getZoneDeNode(carte.getNodeExistante("H1B5N1")),
+                carte.getNodeExistante("H1B5N1"), 0, 2);
+
+        carte.ajouterVehicule(vehicule1);
+        carte.ajouterVehicule(vehicule2);
+        carte.ajouterVehicule(vehicule3);
+        carte.ajouterVehicule(vehicule4);
+        carte.ajouterVehicule(vehicule5);
+
+        //Zone1 to Zone1
+        Utilisateur user1 = new Utilisateur(carte.getNodeExistante("H1A0A2"), carte.getNodeExistante("H1A0A5"), 1);
+        //Zone3 to Zone3
+        Utilisateur user2 = new Utilisateur(carte.getNodeExistante("H1B5P2"), carte.getNodeExistante("H1B5M8"), 1);
+
+        //Zone1 to Zone3
+        Utilisateur user3 = new Utilisateur(carte.getNodeExistante("H1A0A9"), carte.getNodeExistante("H1B5M8"), 2);
+        //Zone2 to Zone3
+        Utilisateur user4 = new Utilisateur(carte.getNodeExistante("H1A 5B5"), carte.getNodeExistante("H1B5M8"), 2);
+
+        //Zone3 to Zone1
+        Utilisateur user5 = new Utilisateur(carte.getNodeExistante("H1B 5M8"), carte.getNodeExistante("H1A0A1"), 3);
+
+        carte.ajouterUtilisateur(user1);
+        carte.ajouterUtilisateur(user2);
+        carte.ajouterUtilisateur(user3);
+        carte.ajouterUtilisateur(user4);
+        carte.ajouterUtilisateur(user5);
+
+        CompteurDeDeplacementsSingleton compteurSingleton = CompteurDeDeplacementsSingleton.getInstance();
+        for (int i = 1; i < 5; i++){
+            //on assume au maximum 4 groupes
+            ArrayList<Utilisateur> utilisateurs = carte.getUtilisateursDuGroupe(i);
+            for (Utilisateur user : utilisateurs){
+                try {
+                    carte.deplacerUtilisateur(user);
+                }
+                catch (NoSuchElementException ex){
+                    System.err.println(ex.getMessage());
+                    System.err.println("La simulation s'est arrêtée.");
+                    carte.remettreVehiculesDisponibles();
+                    equilibrerFlotte();
+                    compteurSingleton.mettreDeplacementsAZero();
+                    return;
+                }
+            }
+
+            carte.remettreVehiculesDisponibles();
+            equilibrerFlotte();
+        }
+
+        printTableauxResultats();
+        compteurSingleton.mettreDeplacementsAZero();
+
+    }
+
+    private void printTableauxResultats(){
+        CompteurDeDeplacementsSingleton compteurSingleton = CompteurDeDeplacementsSingleton.getInstance();
+        System.out.println("Nombre de déplacements à vide : " + compteurSingleton.getNombreDeDeplacementsAVide());
+        System.out.println("Nombre de déplacements avec passagers : " + compteurSingleton.getNombreDeDeplacementsAvecPassagers());
     }
 
     /*C4. Faire une interface qui affiche le menu suivant :
@@ -126,7 +189,7 @@ public class Gestionnaire {
                 entrerClientsEtVehicules();
                 break;
             case DemarrerSimulation:
-                equilibrerFlotte();
+                lancerSimulation();
                 break;
             case Quitter:
                 System.out.println("Au revoir.");

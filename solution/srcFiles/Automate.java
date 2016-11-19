@@ -5,8 +5,11 @@ package srcFiles;
  */
 public class Automate {
     private Node root;
+    private String id; //TODO: Enlever cet id
 
-    public Automate(){}
+    public Automate(String id){
+        this.id = id;
+    }
 
     public void ajouter(String nom){
         String cleanNom = nom.replaceAll("\\s","");
@@ -17,7 +20,7 @@ public class Automate {
 
     public Node getNodeExistante(String nom) {
         String cleanNom = nom.replaceAll("\\s","");
-        return root.getNodeExistante(nom);
+        return root.getNodeExistante(cleanNom);
     }
 
     public Node getDestinationRandom(){
