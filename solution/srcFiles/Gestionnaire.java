@@ -281,15 +281,43 @@ public class Gestionnaire {
 
         if(mode.equals("m") || mode.equals("M")){
 
+
+            //On demande à l'utilisateur d'entrer le nombre de véhicules, on s'assure qu'il correspond à un entier
+            boolean nombreVehiculesIsValide=false;
+            while(!nombreVehiculesIsValide){
+                try{
+                    System.out.println("Entrez le nombre de véchicules désiré:");
+                    nombreVehicules=reader.nextInt();
+                    if(nombreVehicules>0 && nombreVehicules<MAXINT){
+                        nombreVehiculesIsValide=true;
+                        reader.nextLine();
+                    }else{
+                        System.out.println("Entrez un nombre de véhicules valide");
+
+                    }
+                }catch(InputMismatchException e){
+                    System.out.println("Entrez un nombre de véhicules valide");
+                    reader.nextLine();
+                }
+
+            }
+
+            //pour chaque véhicule qu'il désire, on en ajoute un et on initialise toutes les propriétés
+            for(int i=0; i<nombreVehicules ;i++){
+
+                Vehicule nouveauVehicule = new Vehicule();
+                Utilisateur nouveauClient= new Utilisateur();
+
                 //On demande tout d'abord à l'utilisateur d'entrer le code postal de son point de départ
                 boolean departIsValide=false;
                 while(!departIsValide){
                     System.out.println("Entrez le code postal du point de départ:");
                     depart=reader.nextLine();
-                   if(!depart.toUpperCase().matches(regexPostalCode)){ //on valide avec un regex que l'utilisateur entre un code postal valide constitué de chiffres et lettres en alternance
+                    if(!depart.toUpperCase().matches(regexPostalCode)){ //on valide avec un regex que l'utilisateur entre un code postal valide constitué de chiffres et lettres en alternance
                         System.out.println("Entrez un code postal de départ valide");
                     }else{
                         departIsValide=true;
+                        nouveauClient.setOrigine(carte.getNodeExistante(depart));
                     }
                 }
 
@@ -302,79 +330,70 @@ public class Gestionnaire {
                         System.out.println("Entrez un code postal de destination valide");
                     }else{
                         destinationIsValide=true;
+                        nouveauClient.setDestination(carte.getNodeExistante(destination));
                     }
                 }
 
 
-            //On demande à l'utilisateur d'entrer son numéro de groupe, on s'assure que le numéro de groupe correspond à un entier
-            boolean numGroupeIsValide=false;
-            while(!numGroupeIsValide){
-                   try{
-                       System.out.println("Entrez un numéro de groupe:");
-                       numGroupe=reader.nextInt();
-                      if(numGroupe>0 && numGroupe<MAXINT){
-                           numGroupeIsValide=true;
-                          reader.nextLine();////////////////////////////////////////
-                       }else{
-                           System.out.println("Entrez un numéro de groupe valide");
-                       }
-                   }catch(InputMismatchException e){
-                       System.out.println("Entrez un numéro de groupe valide");
-                       reader.nextLine();
-                   }
+                //On demande à l'utilisateur d'entrer son numéro de groupe, on s'assure que le numéro de groupe correspond à un entier
+                boolean numGroupeIsValide=false;
+                while(!numGroupeIsValide){
+                    try{
+                        System.out.println("Entrez un numéro de groupe:");
+                        numGroupe=reader.nextInt();
+                        if(numGroupe>0 && numGroupe<MAXINT){
+                            numGroupeIsValide=true;
+                            reader.nextLine();
+                            nouveauClient.setNumeroDeGroupe(numGroupe);
+                        }else{
+                            System.out.println("Entrez un numéro de groupe valide");
+                        }
+                    }catch(InputMismatchException e){
+                        System.out.println("Entrez un numéro de groupe valide");
+                        reader.nextLine();
+                    }
 
-            }
+                }
 
-            //On demande une zonde de départ valide pour le véhicule et on s'assure qu'elle correspond à un code postal
-            boolean zoneDepartIsValide=false;
-            while(!zoneDepartIsValide){
+                //On demande une zonde de départ valide pour le véhicule et on s'assure qu'elle correspond à un code postal
+                boolean zoneDepartIsValide=false;
+                while(!zoneDepartIsValide){
                     System.out.println("Entrez la zone de départ du véhicule");
                     zoneDepartVehicule=reader.nextLine();
-                if(!zoneDepartVehicule.toUpperCase().matches(regexPostalCode)){
-                    System.out.println("Entrez une code postal de zone de départ du véhicule valide");
-                }else{
-                    zoneDepartIsValide=true;
+                    if(!zoneDepartVehicule.toUpperCase().matches(regexPostalCode)){
+                        System.out.println("Entrez une code postal de zone de départ du véhicule valide");
+                    }else{
+                        zoneDepartIsValide=true;
+                        nouveauVehicule.setZoneActuelle(carte.getZoneDeNode(carte.getNodeExistante(zoneDepartVehicule)));
+                    }
+
                 }
 
-            }
-
-            //On demande à l'utilisateur d'entrer le nombre de passagers, on s'assure qu'il correspond à un entier
-            boolean nombrePassagersIsValide=false;
-            while(!nombrePassagersIsValide){
-                try{
-                    System.out.println("Entrez le nombre de passagers:");
-                    nombrePassagers=reader.nextInt();
-                    if(nombrePassagers>0 && nombrePassagers<MAXINT){
-                       nombrePassagersIsValide=true;
-                    }else{
+                //On demande à l'utilisateur d'entrer le nombre de passagers, on s'assure qu'il correspond à un entier
+                boolean nombrePassagersIsValide=false;
+                while(!nombrePassagersIsValide){
+                    try{
+                        System.out.println("Entrez le nombre de passagers:");
+                        nombrePassagers=reader.nextInt();
+                        if(nombrePassagers>0 && nombrePassagers<MAXINT){
+                            nombrePassagersIsValide=true;
+                            nouveauVehicule.setNombreDePassagers(nombrePassagers);
+                        }else{
+                            System.out.println("Entrez un nombre de passagers valide");
+                        }
+                    }catch(InputMismatchException e){
                         System.out.println("Entrez un nombre de passagers valide");
+                        reader.nextLine();
                     }
-                }catch(InputMismatchException e){
-                    System.out.println("Entrez un nombre de passagers valide");
-                    reader.nextLine();
+
                 }
+
+                carte.ajouterUtilisateur(nouveauClient);
+                carte.ajouterVehicule(nouveauVehicule);
 
             }
 
 
-            //On demande à l'utilisateur d'entrer le nombre de véhicules, on s'assure qu'il correspond à un entier
-            boolean nombreVehiculesIsValide=false;
-            while(!nombreVehiculesIsValide){
-                try{
-                    System.out.println("Entrez le nombre de véchicules désiré:");
-                    nombreVehicules=reader.nextInt();
-                    if(nombreVehicules>0 && nombreVehicules<MAXINT){
-                        nombreVehiculesIsValide=true;
-                    }else{
-                        System.out.println("Entrez un nombre de véhicules valide");
-
-                    }
-                }catch(InputMismatchException e){
-                    System.out.println("Entrez un nombre de véhicules valide");
-                    reader.nextLine();
-                }
-
-            }
 
         }else if(mode.equals("f")|| mode.equals("F")){
 
