@@ -11,7 +11,10 @@ public class Vehicule {
     private Integer nombreDePassagers;
     private Integer nombreDePlacesTotales;
 
-    public Vehicule(){};
+    public Vehicule(){
+        nombreDePassagers = 0;
+        nombreDePlacesTotales = 0;
+    };
 
     public Vehicule(boolean occupation, Automate zoneActuelle, Node positionActuelle, Integer nombreDePassagers, Integer nombreDePlacesTotales){
         this.occupation = occupation;
