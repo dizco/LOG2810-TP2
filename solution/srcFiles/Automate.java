@@ -19,7 +19,7 @@ public class Automate {
     }
 
     public Node getNodeExistante(String nom) {
-        String cleanNom = nom.replaceAll("\\s","");
+        String cleanNom = nom.replaceAll("\\s","").toUpperCase();
         return root.getNodeExistante(cleanNom);
     }
 
