@@ -251,7 +251,8 @@ public class Gestionnaire {
         //TODO: Code temporaire pour fins de tests
         System.out.println("Usage d'un folder temporaire pour charger les fichiers de test.");
         String temp = "C:\\Users\\Gabriel\\OneDrive\\Documents\\.Travaux d'école\\Université\\Session 3\\LOG2810\\TP2\\solution\\testFiles\\";
-        creerLexiques(temp);
+       String tempFred="C:\\Users\\Frédéric\\Documents\\#École\\#Université\\Polytechnique\\#Session 04-Automne 2016\\LOG2810-Structures Discrètes\\TP\\LOG2810-TP2\\solution\\testFiles";
+        creerLexiques(tempFred);
         return;
 
         /*BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
@@ -270,6 +271,7 @@ public class Gestionnaire {
         String mode="",depart, destination,zoneDepartVehicule="";
         Scanner reader = new Scanner(System.in);
         String regexPostalCode = "^[A-Z][0-9][A-Z] ?[0-9][A-Z][0-9]$";
+        Utilisateur nouveauClient= new Utilisateur();
 
 
         System.out.println("Sélectionnez le mode d'entrée des données, entrez ''m'' pour saisie manuelle, ou ''f'' pour saisie à l'aide d'un fichier");
@@ -293,7 +295,6 @@ public class Gestionnaire {
                         reader.nextLine();
                     }else{
                         System.out.println("Entrez un nombre de véhicules valide");
-
                     }
                 }catch(InputMismatchException e){
                     System.out.println("Entrez un nombre de véhicules valide");
@@ -304,20 +305,25 @@ public class Gestionnaire {
 
             //pour chaque véhicule qu'il désire, on en ajoute un et on initialise toutes les propriétés
             for(int i=0; i<nombreVehicules ;i++){
-
+                System.out.println("Nouveau véhicule:");
                 Vehicule nouveauVehicule = new Vehicule();
-                Utilisateur nouveauClient= new Utilisateur();
+
 
                 //On demande tout d'abord à l'utilisateur d'entrer le code postal de son point de départ
                 boolean departIsValide=false;
                 while(!departIsValide){
+
                     System.out.println("Entrez le code postal du point de départ:");
                     depart=reader.nextLine();
                     if(!depart.toUpperCase().matches(regexPostalCode)){ //on valide avec un regex que l'utilisateur entre un code postal valide constitué de chiffres et lettres en alternance
                         System.out.println("Entrez un code postal de départ valide");
                     }else{
-                        departIsValide=true;
-                        nouveauClient.setOrigine(carte.getNodeExistante(depart));
+                     if(carte.getNodeExistante(depart)!= null){
+                         departIsValide=true;
+                         nouveauClient.setOrigine(carte.getNodeExistante(depart));
+                     }else {
+                         System.out.println("Le point de départ que vous avez entré n'est pas valide");
+                     }
                     }
                 }
 
@@ -329,8 +335,13 @@ public class Gestionnaire {
                     if(!destination.toUpperCase().matches(regexPostalCode)){
                         System.out.println("Entrez un code postal de destination valide");
                     }else{
-                        destinationIsValide=true;
-                        nouveauClient.setDestination(carte.getNodeExistante(destination));
+                        if(carte.getNodeExistante(destination)!=null){
+                            destinationIsValide=true;
+                            nouveauClient.setDestination(carte.getNodeExistante(destination));
+                        }
+                        else{
+                            System.out.println("Le point de destination que vous avez entré n'est pas valide");
+                        }
                     }
                 }
 
@@ -363,8 +374,14 @@ public class Gestionnaire {
                     if(!zoneDepartVehicule.toUpperCase().matches(regexPostalCode)){
                         System.out.println("Entrez une code postal de zone de départ du véhicule valide");
                     }else{
-                        zoneDepartIsValide=true;
-                        nouveauVehicule.setZoneActuelle(carte.getZoneDeNode(carte.getNodeExistante(zoneDepartVehicule)));
+                        if(carte.getNodeExistante(zoneDepartVehicule)!= null){
+                            zoneDepartIsValide=true;
+                            nouveauVehicule.setZoneActuelle(carte.getZoneDeNode(carte.getNodeExistante(zoneDepartVehicule)));
+                            nouveauVehicule.setPositionActuelle(carte.getNodeExistante(zoneDepartVehicule));
+                        }else{
+                            System.out.println("Entrez un code postal de de départ valide");
+                        }
+
                     }
 
                 }
@@ -377,7 +394,8 @@ public class Gestionnaire {
                         nombrePassagers=reader.nextInt();
                         if(nombrePassagers>0 && nombrePassagers<MAXINT){
                             nombrePassagersIsValide=true;
-                            nouveauVehicule.setNombreDePassagers(nombrePassagers);
+                            nouveauVehicule.setNombreDePlacesTotales(nombrePassagers);
+                            reader.nextLine();
                         }else{
                             System.out.println("Entrez un nombre de passagers valide");
                         }
