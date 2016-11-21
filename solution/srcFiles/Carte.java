@@ -1,9 +1,6 @@
 package srcFiles;
 
-import com.sun.javaws.exceptions.InvalidArgumentException;
-
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.NoSuchElementException;
 import java.util.Random;
 
@@ -64,6 +61,7 @@ public class Carte {
         ArrayList<Integer> nombreDeVehicules = new ArrayList<>();
         int premierNombre = 0;
         boolean inegal = false;
+        System.out.println("Zone -> Nombre de véhicules avant équilibrage -> Nombre de véhicules après répartition.");
         for (int i = 0; i < zones.size(); i++){
             int nombre = nombreDeVehiculesDansZone(zones.get(i));
             nombreDeVehicules.add(nombre);
@@ -77,6 +75,11 @@ public class Carte {
         if (inegal){
             repartirLesVehiculesEntreLesZones(nombreDeVehicules);
         }
+
+        for (int i = 0; i < zones.size(); i++){
+            System.out.println(i + " -> " + nombreDeVehicules.get(i) + " -> " + nombreDeVehiculesDansZone(zones.get(i)) + ".");
+        }
+
     }
 
     private void repartirLesVehiculesEntreLesZones(ArrayList<Integer> nombreDeVehicules){
@@ -116,13 +119,6 @@ public class Carte {
             }
         }
 
-        /*ArrayList<Integer> nombreDeVehicules2 = new ArrayList<>();
-        for (int i = 0; i < zones.size(); i++){
-            int nombre = nombreDeVehiculesDansZone(zones.get(i));
-            nombreDeVehicules2.add(nombre);
-        }
-
-        int i = 0;*/
     }
 
     private ArrayList<Integer> calculerDifferentiel(ArrayList<Integer> nombreDeVehicules) {
@@ -205,6 +201,8 @@ public class Carte {
     public void deplacerUtilisateur(Utilisateur utilisateur) throws NoSuchElementException {
         Vehicule taxi = getVehiculeLePlusProche(utilisateur.getOrigine());
         if (taxi != null){
+            System.out.println("On prend le véhicule positionné à " + taxi.getPositionActuelle().getNom()
+                    + " pour déplacer un utilisateur vers " + utilisateur.getDestination().getNom() + ".");
             taxi.setOccupation(true);
             taxi.setPositionActuelle(utilisateur.getDestination());
             taxi.setZoneActuelle(getZoneDeNode(utilisateur.getDestination()));
@@ -256,5 +254,17 @@ public class Carte {
             vehicule.setNombreDePassagers(0);
             vehicule.setOccupation(false);
         }
+    }
+
+    public void resetClientsEtVehicules() {
+        vehicules.clear();
+        utilisateurs.clear();
+    }
+
+    public boolean contientAutomateValide(){
+        return zones.size() > 0;
+    }
+    public boolean contientClientsEtVehiculesValides(){
+        return utilisateurs.size() > 0 && vehicules.size() > 0;
     }
 }

@@ -1,9 +1,5 @@
 package srcFiles;
 
-import com.sun.org.apache.xpath.internal.SourceTree;
-import com.sun.xml.internal.ws.message.Util;
-import com.sun.xml.internal.ws.policy.privateutil.PolicyUtils;
-
 import java.io.FileReader;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -27,9 +23,6 @@ public class Gestionnaire {
     public Gestionnaire(){
         carte = new Carte();
     }
-
-    //constante taille maximale INT, nombre maximal de passager et de véhicules qu'il est possible d'avoir à la fois
-    int MAXINT=2147483647;
 
     //C1. Ecrire une fonction ”creerLexiques()” qui permet de lire
     //les fichiers textes correspondants aux zones des v´ehicules.
@@ -79,10 +72,6 @@ public class Gestionnaire {
     //le nombre de v´ehicules pour chaque zone.
     public void equilibrerFlotte(){
         //aucun paramètre a priori
-
-        //Node test = carte.getNodeExistante("H1B1R3");
-        //Automate zone = carte.getZoneDeNode(test);
-
         carte.equilibrerZones();
     }
 
@@ -98,7 +87,7 @@ public class Gestionnaire {
         Vehicule vehicule5 = new Vehicule(false, carte.getZones().get(2), carte.getZones().get(2).getDestinationRandom());
 */
         //Zone1
-        Vehicule vehicule1 = new Vehicule(false, carte.getZoneDeNode(carte.getNodeExistante("H1A0A2")),
+        /*Vehicule vehicule1 = new Vehicule(false, carte.getZoneDeNode(carte.getNodeExistante("H1A0A2")),
                 carte.getNodeExistante("H1A0A2"), 0, 2);
         //Zone1
         Vehicule vehicule2 = new Vehicule(false, carte.getZoneDeNode(carte.getNodeExistante("H1A0A2")),
@@ -136,12 +125,17 @@ public class Gestionnaire {
         carte.ajouterUtilisateur(user2);
         carte.ajouterUtilisateur(user3);
         carte.ajouterUtilisateur(user4);
-        carte.ajouterUtilisateur(user5);
+        carte.ajouterUtilisateur(user5);*/
 
+        System.out.println("Début de la simulation.");
         CompteurDeDeplacementsSingleton compteurSingleton = CompteurDeDeplacementsSingleton.getInstance();
         for (int i = 1; i < 5; i++){
-            //on assume au maximum 4 groupes
+            //TODO: Réviser le nombre max de groupes pour scale
             ArrayList<Utilisateur> utilisateurs = carte.getUtilisateursDuGroupe(i);
+            if (utilisateurs.size() == 0)
+                continue;
+
+            System.out.println(utilisateurs.size() + " utilisateur(s) dans le groupe #" + i + ".");
             for (Utilisateur user : utilisateurs){
                 try {
                     carte.deplacerUtilisateur(user);
@@ -186,10 +180,16 @@ public class Gestionnaire {
                 creerZones();
                 break;
             case EntrerClientsEtVehicules:
-                entrerClientsEtVehicules();
+                if (carte.contientAutomateValide())
+                    entrerClientsEtVehicules();
+                else
+                    System.out.println("Veuillez vous assurer d'avoir complété l'étape (a) avant d'entrer les informations clients et véhicules.");
                 break;
             case DemarrerSimulation:
-                lancerSimulation();
+                if (carte.contientAutomateValide() && carte.contientClientsEtVehiculesValides())
+                    lancerSimulation();
+                else
+                    System.out.println("Veuillez vous assurer d'avoir complété les étapes (a) et (b) avant de lancer une simulation.");
                 break;
             case Quitter:
                 System.out.println("Au revoir.");
@@ -198,22 +198,8 @@ public class Gestionnaire {
                 System.out.println("Option invalide, veuillez réessayer. Les options valides sont (a), (b), (c) et (d).");
         }
 
-        //option (a) doit demander de rentrer le folder où les fichiers de zone sont situés
-        //option (b) permet de rentrer les infos concernant les clients et les véhicules
-            //Utilisateur : point de départ, destination et numéro de groupe
-            //Véhicule : occupation, zone actuelle, position actuelle
-            //doit pouvoir recevoir les infos dans un fichier txt
-            //Option (a) doit avoir été complétée avant
-        //option (c) permet de démarrer la simulation
-            //Option (b) doit avoir été complétée avant
-        //Lorsque fini, afficher les 2 tableaux montrant les résultats
-            //1er : Pour chaque véhicule, nb de trajets avec un occupant et nb de trajets à vide
-            //2e : Nombre de voitures par zones au début et à la fin de la sim
-        //option(d) permet de quitter
         return true;
     }
-
-
 
     private void afficherOptionsDuMenu() {
         System.out.println("\nSélectionnez une option parmi les suivantes : ");
@@ -251,8 +237,8 @@ public class Gestionnaire {
         //TODO: Code temporaire pour fins de tests
         System.out.println("Usage d'un folder temporaire pour charger les fichiers de test.");
         String temp = "C:\\Users\\Gabriel\\OneDrive\\Documents\\.Travaux d'école\\Université\\Session 3\\LOG2810\\TP2\\solution\\testFiles\\";
-       String tempFred="C:\\Users\\Frédéric\\Documents\\#École\\#Université\\Polytechnique\\#Session 04-Automne 2016\\LOG2810-Structures Discrètes\\TP\\LOG2810-TP2\\solution\\testFiles";
-        creerLexiques(tempFred);
+        String tempFred = "C:\\Users\\Frédéric\\Documents\\#École\\#Université\\Polytechnique\\#Session 04-Automne 2016\\LOG2810-Structures Discrètes\\TP\\LOG2810-TP2\\solution\\testFiles";
+        creerLexiques(temp);
         return;
 
         /*BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
@@ -266,160 +252,204 @@ public class Gestionnaire {
         }*/
     }
 
-    private void entrerClientsEtVehicules() {
-        int numGroupe,nombrePassagers, nombreVehicules=0;
-        String mode="",depart, destination,zoneDepartVehicule="";
+    private enum ModeLecture { Manuel, Fichier, Invalide }
+    private ModeLecture demanderModeDeLecture(){
         Scanner reader = new Scanner(System.in);
-        String regexPostalCode = "^[A-Z][0-9][A-Z] ?[0-9][A-Z][0-9]$";
-        Utilisateur nouveauClient= new Utilisateur();
+        ModeLecture modeLecture = ModeLecture.Invalide;
+        boolean isValide = false;
+        while (!isValide){
+            System.out.println("Sélectionnez le mode d'entrée des données, entrez \"m\" pour saisie manuelle, ou \"f\" pour saisie à l'aide d'un fichier");
+            try{
+                String mode = reader.nextLine();
+                if (mode.toUpperCase().equals("M")){
+                    modeLecture = ModeLecture.Manuel;
+                    isValide = true;
+                }
+                else if (mode.toUpperCase().equals("F")){
+                    modeLecture = ModeLecture.Fichier;
+                    isValide = true;
+                }
+            }catch(InputMismatchException e){
+                System.out.println("Sélectionnez le mode d'entrée des données, entrez \"m\" pour saisie manuelle, ou \"f\" pour saisie à l'aide d'un fichier");
+            }
+        }
+        return modeLecture;
+    }
 
+    //On demande à l'utilisateur d'entrer le nombre de véhicules, on s'assure qu'il correspond à un entier
+    private Integer demanderNombreDeVehicules(){
+        Scanner reader = new Scanner(System.in);
+        Integer nombreDeVehicules = 0;
+        boolean isValide = false;
+        while (!isValide){
+            try{
+                System.out.println("Entrez le nombre de véchicules désiré (>0 et <2147483647) : ");
+                nombreDeVehicules = reader.nextInt();
+                if(nombreDeVehicules > 0 && nombreDeVehicules < Integer.MAX_VALUE){
+                    isValide = true;
+                }else{
+                    System.out.println("Entrez un nombre de véhicules valide.");
+                }
+            }catch(InputMismatchException e){
+                System.out.println("Entrez un nombre de véhicules valide.");
+            }
+        }
+        return nombreDeVehicules;
+    }
 
-        System.out.println("Sélectionnez le mode d'entrée des données, entrez ''m'' pour saisie manuelle, ou ''f'' pour saisie à l'aide d'un fichier");
-        try{
-            mode=reader.nextLine();
-        }catch(InputMismatchException e){
-            System.out.println("Sélectionnez un mode de saisie de données, ''m'' pour une saisie manuelle, ''f'' pour saisie à partir d'un fichier");
+    private Vehicule demanderNouveauVehicule(String regexPostalCode){
+        Scanner reader = new Scanner(System.in);
+        Vehicule vehicule = new Vehicule();
+
+        //On demande une zone de départ valide pour le véhicule et on s'assure qu'elle correspond à un code postal
+        boolean zoneDepartIsValide = false;
+        while(!zoneDepartIsValide){
+            System.out.println("Entrez la position actuelle du véhicule (ex: H1A0A1) : ");
+            String positionVehicule = reader.nextLine();
+            if(!positionVehicule.toUpperCase().matches(regexPostalCode)){
+                System.out.println("Entrez une code postal de quartier de départ du véhicule valide.");
+            } else {
+                if(carte.getNodeExistante(positionVehicule)!= null){
+                    zoneDepartIsValide=true;
+                    vehicule.setZoneActuelle(carte.getZoneDeNode(carte.getNodeExistante(positionVehicule)));
+                    vehicule.setPositionActuelle(carte.getNodeExistante(positionVehicule));
+                }else{
+                    System.out.println("Entrez un code postal de de départ valide.");
+                }
+            }
         }
 
-        if(mode.equals("m") || mode.equals("M")){
-
-
-            //On demande à l'utilisateur d'entrer le nombre de véhicules, on s'assure qu'il correspond à un entier
-            boolean nombreVehiculesIsValide=false;
-            while(!nombreVehiculesIsValide){
-                try{
-                    System.out.println("Entrez le nombre de véchicules désiré:");
-                    nombreVehicules=reader.nextInt();
-                    if(nombreVehicules>0 && nombreVehicules<MAXINT){
-                        nombreVehiculesIsValide=true;
-                        reader.nextLine();
-                    }else{
-                        System.out.println("Entrez un nombre de véhicules valide");
-                    }
-                }catch(InputMismatchException e){
-                    System.out.println("Entrez un nombre de véhicules valide");
+        //On demande à l'utilisateur d'entrer le nombre de passagers, on s'assure qu'il correspond à un entier
+        boolean nombrePassagersIsValide = false;
+        while(!nombrePassagersIsValide){
+            try{
+                System.out.println("Entrez le nombre de places totales dans le véhicule (ex : 2) : ");
+                Integer nombrePassagers = reader.nextInt();
+                if(nombrePassagers > 0 && nombrePassagers < Integer.MAX_VALUE){
+                    nombrePassagersIsValide=true;
+                    vehicule.setNombreDePlacesTotales(nombrePassagers);
                     reader.nextLine();
+                }else{
+                    System.out.println("Entrez un nombre de passagers valide.");
                 }
-
+            }catch(InputMismatchException e){
+                System.out.println("Entrez un nombre de passagers valide.");
             }
+        }
+        return vehicule;
+    }
 
-            //pour chaque véhicule qu'il désire, on en ajoute un et on initialise toutes les propriétés
-            for(int i=0; i<nombreVehicules ;i++){
-                System.out.println("Nouveau véhicule:");
-                Vehicule nouveauVehicule = new Vehicule();
-
-
-                //On demande tout d'abord à l'utilisateur d'entrer le code postal de son point de départ
-                boolean departIsValide=false;
-                while(!departIsValide){
-
-                    System.out.println("Entrez le code postal du point de départ:");
-                    depart=reader.nextLine();
-                    if(!depart.toUpperCase().matches(regexPostalCode)){ //on valide avec un regex que l'utilisateur entre un code postal valide constitué de chiffres et lettres en alternance
-                        System.out.println("Entrez un code postal de départ valide");
-                    }else{
-                     if(carte.getNodeExistante(depart)!= null){
-                         departIsValide=true;
-                         nouveauClient.setOrigine(carte.getNodeExistante(depart));
-                     }else {
-                         System.out.println("Le point de départ que vous avez entré n'est pas valide");
-                     }
-                    }
+    private Integer demanderNombreDUtilisateurs(){
+        Scanner reader = new Scanner(System.in);
+        Integer nombreDUtilisateurs = 0;
+        boolean isValide = false;
+        while (!isValide){
+            try{
+                System.out.println("Entrez le nombre d'utilisateurs désiré (>0 et <2147483647) : ");
+                nombreDUtilisateurs = reader.nextInt();
+                if(nombreDUtilisateurs > 0 && nombreDUtilisateurs < Integer.MAX_VALUE){
+                    isValide = true;
+                }else{
+                    System.out.println("Entrez un nombre d'utilisateurs valide.");
                 }
-
-                //On demande ensuite à l'utilisateur d'entrer le code postal de destination
-                boolean destinationIsValide=false;
-                while(!destinationIsValide){
-                    System.out.println("Entrez le code postal du point de destination:");
-                    destination=reader.nextLine();
-                    if(!destination.toUpperCase().matches(regexPostalCode)){
-                        System.out.println("Entrez un code postal de destination valide");
-                    }else{
-                        if(carte.getNodeExistante(destination)!=null){
-                            destinationIsValide=true;
-                            nouveauClient.setDestination(carte.getNodeExistante(destination));
-                        }
-                        else{
-                            System.out.println("Le point de destination que vous avez entré n'est pas valide");
-                        }
-                    }
-                }
-
-
-                //On demande à l'utilisateur d'entrer son numéro de groupe, on s'assure que le numéro de groupe correspond à un entier
-                boolean numGroupeIsValide=false;
-                while(!numGroupeIsValide){
-                    try{
-                        System.out.println("Entrez un numéro de groupe:");
-                        numGroupe=reader.nextInt();
-                        if(numGroupe>0 && numGroupe<MAXINT){
-                            numGroupeIsValide=true;
-                            reader.nextLine();
-                            nouveauClient.setNumeroDeGroupe(numGroupe);
-                        }else{
-                            System.out.println("Entrez un numéro de groupe valide");
-                        }
-                    }catch(InputMismatchException e){
-                        System.out.println("Entrez un numéro de groupe valide");
-                        reader.nextLine();
-                    }
-
-                }
-
-                //On demande une zonde de départ valide pour le véhicule et on s'assure qu'elle correspond à un code postal
-                boolean zoneDepartIsValide=false;
-                while(!zoneDepartIsValide){
-                    System.out.println("Entrez la zone de départ du véhicule");
-                    zoneDepartVehicule=reader.nextLine();
-                    if(!zoneDepartVehicule.toUpperCase().matches(regexPostalCode)){
-                        System.out.println("Entrez une code postal de zone de départ du véhicule valide");
-                    }else{
-                        if(carte.getNodeExistante(zoneDepartVehicule)!= null){
-                            zoneDepartIsValide=true;
-                            nouveauVehicule.setZoneActuelle(carte.getZoneDeNode(carte.getNodeExistante(zoneDepartVehicule)));
-                            nouveauVehicule.setPositionActuelle(carte.getNodeExistante(zoneDepartVehicule));
-                        }else{
-                            System.out.println("Entrez un code postal de de départ valide");
-                        }
-
-                    }
-
-                }
-
-                //On demande à l'utilisateur d'entrer le nombre de passagers, on s'assure qu'il correspond à un entier
-                boolean nombrePassagersIsValide=false;
-                while(!nombrePassagersIsValide){
-                    try{
-                        System.out.println("Entrez le nombre de passagers:");
-                        nombrePassagers=reader.nextInt();
-                        if(nombrePassagers>0 && nombrePassagers<MAXINT){
-                            nombrePassagersIsValide=true;
-                            nouveauVehicule.setNombreDePlacesTotales(nombrePassagers);
-                            reader.nextLine();
-                        }else{
-                            System.out.println("Entrez un nombre de passagers valide");
-                        }
-                    }catch(InputMismatchException e){
-                        System.out.println("Entrez un nombre de passagers valide");
-                        reader.nextLine();
-                    }
-
-                }
-
-                carte.ajouterUtilisateur(nouveauClient);
-                carte.ajouterVehicule(nouveauVehicule);
-
+            }catch(InputMismatchException e){
+                System.out.println("Entrez un nombre de d'utilisateurs valide.");
             }
+        }
+        return nombreDUtilisateurs;
+    }
 
+    private Utilisateur demanderNouvelUtilisateur(String regexPostalCode){
+        Scanner reader = new Scanner(System.in);
+        Utilisateur utilisateur = new Utilisateur();
 
+        //On demande tout d'abord à l'utilisateur d'entrer le code postal de son point de départ
+        boolean departIsValide = false;
+        while(!departIsValide){
+            System.out.println("Entrez le code postal du point de départ (ex : H1A0A1) : ");
+            String depart = reader.nextLine();
+            if(!depart.toUpperCase().matches(regexPostalCode)){ //on valide avec un regex que l'utilisateur entre un code postal valide constitué de chiffres et lettres en alternance
+                System.out.println("Entrez un code postal de départ valide.");
+            }
+            else{
+                if(carte.getNodeExistante(depart) != null){
+                    departIsValide = true;
+                    utilisateur.setOrigine(carte.getNodeExistante(depart));
+                }
+                else {
+                    System.out.println("Le point de départ que vous avez entré n'est pas valide.");
+                }
+            }
+        }
 
-        }else if(mode.equals("f")|| mode.equals("F")){
+        //On demande ensuite à l'utilisateur d'entrer le code postal de destination
+        boolean destinationIsValide = false;
+        while(!destinationIsValide){
+            System.out.println("Entrez le code postal du point de destination : ");
+            String destination = reader.nextLine();
+            if(!destination.toUpperCase().matches(regexPostalCode)){
+                System.out.println("Entrez un code postal de destination valide.");
+            }else{
+                if(carte.getNodeExistante(destination) != null){
+                    destinationIsValide=true;
+                    utilisateur.setDestination(carte.getNodeExistante(destination));
+                }
+                else{
+                    System.out.println("Le point de destination que vous avez entré n'est pas valide.");
+                }
+            }
+        }
 
+        //On demande à l'utilisateur d'entrer son numéro de groupe, on s'assure que le numéro de groupe correspond à un entier
+        boolean numGroupeIsValide = false;
+        while(!numGroupeIsValide){
+            try{
+                System.out.println("Entrez un numéro de groupe (>0 et <2147483647) : ");
+                Integer numGroupe = reader.nextInt();
+                if(numGroupe > 0 && numGroupe < Integer.MAX_VALUE){
+                    numGroupeIsValide=true;
+                    utilisateur.setNumeroDeGroupe(numGroupe);
+                }
+                else {
+                    System.out.println("Entrez un numéro de groupe valide.");
+                }
+            }catch(InputMismatchException e){
+                System.out.println("Entrez un numéro de groupe valide.");
+            }
+        }
+        return utilisateur;
+    }
 
-        }else{
-            System.out.println("Sélectionnez un mode de saisie de données, ''m'' pour une saisie manuelle, ''f'' pour saisie à partir d'un fichier");
+    private void entrerClientsEtVehicules() {
+        carte.resetClientsEtVehicules();
+        String regexPostalCode = "^[A-Z][0-9][A-Z] ?[0-9][A-Z][0-9]$";
+
+        ModeLecture modeDeLecture = demanderModeDeLecture();
+        if (modeDeLecture.equals(ModeLecture.Manuel)) {
+            Integer nombreDeVehicules = demanderNombreDeVehicules();
+            for (int i = 0; i < nombreDeVehicules; i++){
+                System.out.println("Véhicule #" + (i + 1) + " / " + nombreDeVehicules + ".");
+                Vehicule vehicule = demanderNouveauVehicule(regexPostalCode);
+                carte.ajouterVehicule(vehicule);
+            }
+            System.out.println("");
+
+            Integer nombreDUtilisateurs = demanderNombreDUtilisateurs();
+            for (int i = 0; i < nombreDUtilisateurs; i++){
+                System.out.println("Utilisateur #" + (i + 1) + " / " + nombreDUtilisateurs + ".");
+                Utilisateur utilisateur = demanderNouvelUtilisateur(regexPostalCode);
+                carte.ajouterUtilisateur(utilisateur);
+            }
+            System.out.println("");
+        }
+        else if (modeDeLecture.equals(ModeLecture.Fichier)){
+            //TODO:
+        }
+        else{
+            System.out.println("Vous avez saisi une commande invalide, l'action n'a pu être traitée.");
         }
     }
+
 
 
 }
