@@ -204,7 +204,7 @@ public class Carte {
 
     private Vehicule getVehiculeLibreDansNode(Node node){
         for (Vehicule vehicule : vehicules){
-            if (vehicule.getPositionActuelle().equals(node) && vehicule.peutAccueillirPassagers(1))
+            if (vehicule.getPositionActuelle().equals(node) && vehicule.peutAccueillirPassagers())
                 return vehicule;
         }
         return null;
@@ -263,7 +263,7 @@ public class Carte {
 
     private Vehicule getVehiculeLibreDansLaZone(Automate zone){
         for (Vehicule vehicule : vehicules){
-            if (vehicule.getZoneActuelle().equals(zone) && vehicule.peutAccueillirPassagers(1))
+            if (vehicule.getZoneActuelle().equals(zone) && vehicule.peutAccueillirPassagers())
                 return vehicule;
         }
         return null;

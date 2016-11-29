@@ -51,6 +51,7 @@ public class GestionnaireTest {
     public void lectureFolder() throws Exception {
         setup();
         assertNotEquals(null, gestionnaire.getCarte());
+        assertNotEquals(0, gestionnaire.getCarte().getZones().size());
     }
 
     @org.junit.Test
