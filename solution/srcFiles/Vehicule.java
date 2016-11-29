@@ -8,20 +8,12 @@ public class Vehicule {
     private Automate zoneActuelle;
     private Node positionActuelle;
 
-    private Integer nombreDePassagers;
-    private Integer nombreDePlacesTotales;
+    public Vehicule(){}
 
-    public Vehicule(){
-        nombreDePassagers = 0;
-        nombreDePlacesTotales = 0;
-    };
-
-    public Vehicule(boolean occupation, Automate zoneActuelle, Node positionActuelle, Integer nombreDePassagers, Integer nombreDePlacesTotales){
+    public Vehicule(boolean occupation, Automate zoneActuelle, Node positionActuelle){
         this.occupation = occupation;
         this.zoneActuelle = zoneActuelle;
         this.positionActuelle = positionActuelle;
-        this.nombreDePassagers = nombreDePassagers;
-        this.nombreDePlacesTotales = nombreDePlacesTotales;
     }
 
     public boolean estOccupe() {
@@ -36,14 +28,6 @@ public class Vehicule {
         return positionActuelle;
     }
 
-    public Integer getNombreDePassagers() {
-        return nombreDePassagers;
-    }
-
-    public Integer getNombreDePlacesTotales() {
-        return nombreDePlacesTotales;
-    }
-
     public void setOccupation(boolean occupation) {
         this.occupation = occupation;
     }
@@ -56,19 +40,7 @@ public class Vehicule {
         this.positionActuelle = positionActuelle;
     }
 
-    public void setNombreDePassagers(Integer nombreDePassagers) {
-        if (nombreDePassagers > nombreDePlacesTotales)
-            throw new IllegalArgumentException("Le nombre de passagers ne peut être supérieur au nombre de places totales.");
-        this.nombreDePassagers = nombreDePassagers;
-    }
-
-    public void setNombreDePlacesTotales(Integer nombreDePlacesTotales) {
-        if (nombreDePassagers > nombreDePlacesTotales)
-            throw new IllegalArgumentException("Le nombre de passagers ne peut être supérieur au nombre de places totales.");
-        this.nombreDePlacesTotales = nombreDePlacesTotales;
-    }
-
-    public boolean peutAccueillirPassagers(Integer nombreDePassagers){
-        return !estOccupe() && (this.nombreDePlacesTotales >= nombreDePassagers);
+    public boolean peutAccueillirPassagers(){
+        return !estOccupe();
     }
 }
