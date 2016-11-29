@@ -5,7 +5,7 @@ package srcFiles;
  */
 public class Automate {
     private Node root;
-    private String id; //TODO: Enlever cet id
+    private String id; //TODO: Enlever cet id. Il permet simplement de savoir à quel nom de fichier on fait référence
 
     public Automate(String id){
         this.id = id;

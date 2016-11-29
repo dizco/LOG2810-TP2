@@ -24,15 +24,19 @@ public class Gestionnaire {
         carte = new Carte();
     }
 
+    public Carte getCarte() {
+        return carte;
+    }
+
     //C1. Ecrire une fonction ”creerLexiques()” qui permet de lire
-    //les fichiers textes correspondants aux zones des v´ehicules.
+    //les fichiers textes correspondants aux zones des véhicules.
     //Inspiré de : http://stackoverflow.com/a/1846349/6316091
     public void creerLexiques(String folderName) {
         Carte nouvelleCarte = new Carte();
         try(Stream<Path> paths = Files.walk(Paths.get(folderName))) {
             paths.forEach(filePath -> {
                 if (Files.isRegularFile(filePath)) {
-                    System.out.println(filePath); //TODO: retirer
+                    System.out.println("Chargement du fichier : " + filePath);
                     try {
                         nouvelleCarte.ajouterZone(lireFichier(filePath));
                     }
@@ -68,69 +72,19 @@ public class Gestionnaire {
         return automate;
     }
 
-    //C2. Ecrire une fonction ”equilibrerFlotte()” qui permet d’´equilibrer
-    //le nombre de v´ehicules pour chaque zone.
+    //C2. Ecrire une fonction ”equilibrerFlotte()” qui permet d’équilibrer
+    //le nombre de véhicules pour chaque zone.
     public void equilibrerFlotte(){
         //aucun paramètre a priori
         carte.equilibrerZones();
     }
 
-    //C3. Ecrire une fonction ”lancerSimulation()” qui d´emarre la simulation  ´
-    //une fois que l’utilisateur a rentr´e les donn´ees n´ecessaires.
+    //C3. Ecrire une fonction ”lancerSimulation()” qui démarre la simulation  ´
+    //une fois que l’utilisateur a rentré les données nécessaires.
     public void lancerSimulation() {
         //peut prendre comme paramètres les données de simulation entrées par l'utilisateur
 
-        /*Vehicule vehicule1 = new Vehicule(false, carte.getZones().get(0), carte.getZones().get(0).getDestinationRandom());
-        Vehicule vehicule2 = new Vehicule(false, carte.getZones().get(0), carte.getZones().get(0).getDestinationRandom());
-        Vehicule vehicule3 = new Vehicule(false, carte.getZones().get(2), carte.getZones().get(2).getDestinationRandom());
-        Vehicule vehicule4 = new Vehicule(false, carte.getZones().get(2), carte.getZones().get(2).getDestinationRandom());
-        Vehicule vehicule5 = new Vehicule(false, carte.getZones().get(2), carte.getZones().get(2).getDestinationRandom());
-*/
-        //Zone1
-        /*Vehicule vehicule1 = new Vehicule(false, carte.getZoneDeNode(carte.getNodeExistante("H1A0A2")),
-                carte.getNodeExistante("H1A0A2"), 0, 2);
-        //Zone1
-        Vehicule vehicule2 = new Vehicule(false, carte.getZoneDeNode(carte.getNodeExistante("H1A0A2")),
-                carte.getNodeExistante("H1A0A2"), 0, 2);
-        //Zone3
-        Vehicule vehicule3 = new Vehicule(false, carte.getZoneDeNode(carte.getNodeExistante("H1B5M8")),
-                carte.getNodeExistante("H1B5M8"), 0, 2);
-        //Zone3
-        Vehicule vehicule4 = new Vehicule(false, carte.getZoneDeNode(carte.getNodeExistante("H1B5M8")),
-                carte.getNodeExistante("H1B5M8"), 0, 2);
-        //Zone3
-        Vehicule vehicule5 = new Vehicule(false, carte.getZoneDeNode(carte.getNodeExistante("H1B5N1")),
-                carte.getNodeExistante("H1B5N1"), 0, 2);
-
-        carte.ajouterVehicule(vehicule1);
-        carte.ajouterVehicule(vehicule2);
-        carte.ajouterVehicule(vehicule3);
-        carte.ajouterVehicule(vehicule4);
-        carte.ajouterVehicule(vehicule5);
-
-        //Zone1 to Zone1
-        Utilisateur user1 = new Utilisateur(carte.getNodeExistante("H1A0A2"), carte.getNodeExistante("H1A0A5"), 1);
-        //Zone3 to Zone3
-        Utilisateur user2 = new Utilisateur(carte.getNodeExistante("H1B5P2"), carte.getNodeExistante("H1B5M8"), 1);
-
-        //Zone1 to Zone3
-        Utilisateur user3 = new Utilisateur(carte.getNodeExistante("H1A0A9"), carte.getNodeExistante("H1B5M8"), 2);
-        //Zone2 to Zone3
-        Utilisateur user4 = new Utilisateur(carte.getNodeExistante("H1A 5B5"), carte.getNodeExistante("H1B5M8"), 2);
-
-        //Zone3 to Zone1
-        Utilisateur user5 = new Utilisateur(carte.getNodeExistante("H1B 5M8"), carte.getNodeExistante("H1A0A1"), 3);
-
-        carte.ajouterUtilisateur(user1);
-        carte.ajouterUtilisateur(user2);
-        carte.ajouterUtilisateur(user3);
-        carte.ajouterUtilisateur(user4);
-        carte.ajouterUtilisateur(user5);*/
-
-        System.out.println("Début de la simulation.");
-        CompteurDeDeplacementsSingleton compteurSingleton = CompteurDeDeplacementsSingleton.getInstance();
-        for (int i = 1; i < 5; i++){
-            //TODO: Réviser le nombre max de groupes pour scale
+        for (int i = 1; i <= carte.getNumeroDeGroupeMax(); i++){
             ArrayList<Utilisateur> utilisateurs = carte.getUtilisateursDuGroupe(i);
             if (utilisateurs.size() == 0)
                 continue;
@@ -142,21 +96,13 @@ public class Gestionnaire {
                 }
                 catch (NoSuchElementException ex){
                     System.err.println(ex.getMessage());
-                    System.err.println("La simulation s'est arrêtée.");
-                    carte.remettreVehiculesDisponibles();
-                    equilibrerFlotte();
-                    compteurSingleton.mettreDeplacementsAZero();
-                    return;
+                    System.out.println("On perd 1 usager car on n'a pas de véhicule pour lui répondre.");
                 }
             }
 
             carte.remettreVehiculesDisponibles();
             equilibrerFlotte();
         }
-
-        printTableauxResultats();
-        compteurSingleton.mettreDeplacementsAZero();
-
     }
 
     private void printTableauxResultats(){
@@ -186,8 +132,13 @@ public class Gestionnaire {
                     System.out.println("Veuillez vous assurer d'avoir complété l'étape (a) avant d'entrer les informations clients et véhicules.");
                 break;
             case DemarrerSimulation:
-                if (carte.contientAutomateValide() && carte.contientClientsEtVehiculesValides())
+                if (carte.contientAutomateValide() && carte.contientClientsEtVehiculesValides()){
+                    System.out.println("Début de la simulation.");
+                    CompteurDeDeplacementsSingleton compteurSingleton = CompteurDeDeplacementsSingleton.getInstance();
                     lancerSimulation();
+                    printTableauxResultats();
+                    compteurSingleton.mettreDeplacementsAZero();
+                }
                 else
                     System.out.println("Veuillez vous assurer d'avoir complété les étapes (a) et (b) avant de lancer une simulation.");
                 break;
@@ -235,24 +186,56 @@ public class Gestionnaire {
 
     private void creerZones() {
         //TODO: Code temporaire pour fins de tests
-        System.out.println("Usage d'un folder temporaire pour charger les fichiers de test.");
+        /*System.out.println("Usage d'un folder temporaire pour charger les fichiers de test.");
         String temp = "C:\\Users\\Gabriel\\OneDrive\\Documents\\.Travaux d'école\\Université\\Session 3\\LOG2810\\TP2\\solution\\testFiles\\";
         String tempFred = "C:\\Users\\Frédéric\\Documents\\#École\\#Université\\Polytechnique\\#Session 04-Automne 2016\\LOG2810-Structures Discrètes\\TP\\LOG2810-TP2\\solution\\testFiles";
         creerLexiques(temp);
-        return;
+        return;*/
 
-        /*BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-        System.out.println("Entrer le nom de folder (ex : C:\\Users\\Gabriel\\OneDrive\\Documents\\.Travaux d'école\\Université\\Session 3\\LOG2810\\TP2\\solution\\testFiles\\) : ");
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        System.out.println("Entrer le nom de dossier complet (ex : C:\\Users\\Gabriel\\Documents\\LOG2810\\TP2\\solution\\testFiles\\) : ");
         try {
             String folderName = br.readLine();
             creerLexiques(folderName);
         }
         catch(IOException ex){
-            //TODO: Avertir usager
-        }*/
+            System.out.println("Erreur lors de la lecture. Veuillez entrer un nom de dossier valide.");
+        }
     }
 
     private enum ModeLecture { Manuel, Fichier, Invalide }
+
+    private void entrerClientsEtVehicules() {
+        carte.resetClientsEtVehicules();
+        String regexPostalCode = "^[A-Z][0-9][A-Z] ?[0-9][A-Z][0-9]$";
+
+        ModeLecture modeDeLecture = ModeLecture.Manuel; //demanderModeDeLecture();
+        if (modeDeLecture.equals(ModeLecture.Manuel)) {
+            Integer nombreDeVehicules = demanderNombreDeVehicules();
+            for (int i = 0; i < nombreDeVehicules; i++){
+                System.out.println("Véhicule #" + (i + 1) + " / " + nombreDeVehicules + ".");
+                Vehicule vehicule = demanderNouveauVehicule(regexPostalCode);
+                carte.ajouterVehicule(vehicule);
+            }
+            System.out.println("");
+
+            Integer nombreDUtilisateurs = demanderNombreDUtilisateurs();
+            for (int i = 0; i < nombreDUtilisateurs; i++){
+                System.out.println("Utilisateur #" + (i + 1) + " / " + nombreDUtilisateurs + ".");
+                Utilisateur utilisateur = demanderNouvelUtilisateur(regexPostalCode);
+                carte.ajouterUtilisateur(utilisateur);
+            }
+            System.out.println("");
+        }
+        else if (modeDeLecture.equals(ModeLecture.Fichier)){
+            //TODO: Pas obligé selon Alexandre
+        }
+        else{
+            System.out.println("Vous avez saisi une commande invalide, l'action n'a pu être traitée.");
+        }
+    }
+
+    //Fonction inutilisée par manque de temps
     private ModeLecture demanderModeDeLecture(){
         Scanner reader = new Scanner(System.in);
         ModeLecture modeLecture = ModeLecture.Invalide;
@@ -319,23 +302,7 @@ public class Gestionnaire {
             }
         }
 
-        //On demande à l'utilisateur d'entrer le nombre de passagers, on s'assure qu'il correspond à un entier
-        boolean nombrePassagersIsValide = false;
-        while(!nombrePassagersIsValide){
-            try{
-                System.out.println("Entrez le nombre de places totales dans le véhicule (ex : 2) : ");
-                Integer nombrePassagers = reader.nextInt();
-                if(nombrePassagers > 0 && nombrePassagers < Integer.MAX_VALUE){
-                    nombrePassagersIsValide=true;
-                    vehicule.setNombreDePlacesTotales(nombrePassagers);
-                    reader.nextLine();
-                }else{
-                    System.out.println("Entrez un nombre de passagers valide.");
-                }
-            }catch(InputMismatchException e){
-                System.out.println("Entrez un nombre de passagers valide.");
-            }
-        }
+        //vehicule.setNombreDePlacesTotales(1);
         return vehicule;
     }
 
@@ -419,37 +386,4 @@ public class Gestionnaire {
         }
         return utilisateur;
     }
-
-    private void entrerClientsEtVehicules() {
-        carte.resetClientsEtVehicules();
-        String regexPostalCode = "^[A-Z][0-9][A-Z] ?[0-9][A-Z][0-9]$";
-
-        ModeLecture modeDeLecture = demanderModeDeLecture();
-        if (modeDeLecture.equals(ModeLecture.Manuel)) {
-            Integer nombreDeVehicules = demanderNombreDeVehicules();
-            for (int i = 0; i < nombreDeVehicules; i++){
-                System.out.println("Véhicule #" + (i + 1) + " / " + nombreDeVehicules + ".");
-                Vehicule vehicule = demanderNouveauVehicule(regexPostalCode);
-                carte.ajouterVehicule(vehicule);
-            }
-            System.out.println("");
-
-            Integer nombreDUtilisateurs = demanderNombreDUtilisateurs();
-            for (int i = 0; i < nombreDUtilisateurs; i++){
-                System.out.println("Utilisateur #" + (i + 1) + " / " + nombreDUtilisateurs + ".");
-                Utilisateur utilisateur = demanderNouvelUtilisateur(regexPostalCode);
-                carte.ajouterUtilisateur(utilisateur);
-            }
-            System.out.println("");
-        }
-        else if (modeDeLecture.equals(ModeLecture.Fichier)){
-            //TODO:
-        }
-        else{
-            System.out.println("Vous avez saisi une commande invalide, l'action n'a pu être traitée.");
-        }
-    }
-
-
-
 }

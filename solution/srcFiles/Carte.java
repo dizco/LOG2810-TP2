@@ -90,18 +90,7 @@ public class Carte {
         for (int i = 0; i < zones.size(); i++){
             while (differentiel.get(i) > 0){
                 differentiel.set(i, differentiel.get(i) - 1);
-                vehiculesExcedentaires.add(getVehiculeRandomDansZone(zones.get(i)));
-            }
-        }
-
-        while (Math.abs(calculerSomme(differentiel)) > vehiculesExcedentaires.size()) {
-            //on a besoin de plus de véhicules que ceux que l'on a
-            boolean vehiculeTrouve = false;
-            for (int i = 0; i < zones.size() && !vehiculeTrouve; i++){
-                if (nombreDeVehiculesDansZone(zones.get(i)) == (int)Math.ceil(calculateAverage(nombreDeVehicules))){
-                    vehiculesExcedentaires.add(getVehiculeRandomDansZone(zones.get(i)));
-                    vehiculeTrouve = true;
-                }
+                vehiculesExcedentaires.add(getVehiculeRandomDansZoneEtRetirer(zones.get(i)));
             }
         }
 
@@ -136,6 +125,35 @@ public class Carte {
             else //il y a un nombre acceptable de véhicules
                 differentiel.add(i, 0);
         }
+
+        while (calculerSomme(differentiel) > 0){
+            //si la somme est positive,
+            //on doit répartir des véhicules dans des zones qui ont un différentiel de 0
+            //et qui sont à la limite du down
+            boolean differentielNulTrouve = false;
+            for (int i = 0; i < differentiel.size() && !differentielNulTrouve; i++){
+                Integer nombreModule = nombreDeVehicules.get(i) - differentiel.get(i);
+                if (nombreModule >= down && nombreModule < up){
+                    differentiel.set(i, differentiel.get(i) - 1);
+                    differentielNulTrouve = true;
+                }
+            }
+        }
+
+        while (calculerSomme(differentiel) < 0){
+            //Si la somme est négative,
+            //on doit récupérer des véhicules dans les zones qui ont un différentiel de 0
+            //et qui sont à la limite du up
+            boolean differentielNulTrouve = false;
+            for (int i = 0; i < differentiel.size() && !differentielNulTrouve; i++){
+                Integer nombreModule = nombreDeVehicules.get(i) - differentiel.get(i);
+                if (nombreModule > down && nombreModule <= up){
+                    differentiel.set(i, differentiel.get(i) + 1);
+                    differentielNulTrouve = true;
+                }
+            }
+        }
+
         return differentiel;
     }
 
@@ -159,7 +177,7 @@ public class Carte {
         return somme;
     }
 
-    private int nombreDeVehiculesDansZone(Automate zone){
+    public int nombreDeVehiculesDansZone(Automate zone){
         int nombre = 0;
         for (Vehicule vehicule : vehicules)
             if (vehicule.getZoneActuelle().equals(zone))
@@ -167,18 +185,21 @@ public class Carte {
         return nombre;
     }
 
-    private Vehicule getVehiculeRandomDansZone(Automate zone){
+    private Vehicule getVehiculeRandomDansZoneEtRetirer(Automate zone){
         Random generator = new Random(System.nanoTime());
         ArrayList<Vehicule> vehiculesDansZone = new ArrayList<>();
         for (Vehicule vehicule : vehicules){
-            if (vehicule.getZoneActuelle().equals(zone))
+            if (vehicule.getZoneActuelle() != null && vehicule.getZoneActuelle().equals(zone))
                 vehiculesDansZone.add(vehicule);
         }
 
         if (vehiculesDansZone.size() == 0)
             throw new NoSuchElementException();
 
-        return vehiculesDansZone.get(generator.nextInt(vehiculesDansZone.size()));
+        Vehicule vehicule = vehiculesDansZone.get(generator.nextInt(vehiculesDansZone.size()));
+        vehicule.setZoneActuelle(null);
+        vehicule.setPositionActuelle(null);
+        return vehicule;
     }
 
     private Vehicule getVehiculeLibreDansNode(Node node){
@@ -206,7 +227,6 @@ public class Carte {
             taxi.setOccupation(true);
             taxi.setPositionActuelle(utilisateur.getDestination());
             taxi.setZoneActuelle(getZoneDeNode(utilisateur.getDestination()));
-            taxi.setNombreDePassagers(taxi.getNombreDePassagers() + 1);
             CompteurDeDeplacementsSingleton.getInstance().augmenterNombreDeDeplacementsAvecPassagers();
         }
         else {
@@ -251,11 +271,16 @@ public class Carte {
 
     public void remettreVehiculesDisponibles(){
         for (Vehicule vehicule : vehicules){
-            vehicule.setNombreDePassagers(0);
             vehicule.setOccupation(false);
         }
     }
 
+    public void resetClients(){
+        utilisateurs.clear();
+    }
+    public void resetVehicules(){
+        vehicules.clear();
+    }
     public void resetClientsEtVehicules() {
         vehicules.clear();
         utilisateurs.clear();
@@ -266,5 +291,13 @@ public class Carte {
     }
     public boolean contientClientsEtVehiculesValides(){
         return utilisateurs.size() > 0 && vehicules.size() > 0;
+    }
+
+    public Integer getNumeroDeGroupeMax(){
+        Integer max = 1;
+        for (Utilisateur utilisateur : utilisateurs)
+            if (utilisateur.getNumeroDeGroupe() > max)
+                max = utilisateur.getNumeroDeGroupe();
+        return max;
     }
 }
