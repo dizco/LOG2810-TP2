@@ -272,9 +272,11 @@ public class Gestionnaire {
                     isValide = true;
                 }else{
                     System.out.println("Entrez un nombre de véhicules valide.");
+                    reader.next();
                 }
             }catch(InputMismatchException e){
                 System.out.println("Entrez un nombre de véhicules valide.");
+                reader.next();
             }
         }
         return nombreDeVehicules;
@@ -318,9 +320,11 @@ public class Gestionnaire {
                     isValide = true;
                 }else{
                     System.out.println("Entrez un nombre d'utilisateurs valide.");
+                    reader.next();
                 }
             }catch(InputMismatchException e){
                 System.out.println("Entrez un nombre de d'utilisateurs valide.");
+                reader.next();
             }
         }
         return nombreDUtilisateurs;
@@ -379,9 +383,11 @@ public class Gestionnaire {
                 }
                 else {
                     System.out.println("Entrez un numéro de groupe valide.");
+                    reader.next();
                 }
             }catch(InputMismatchException e){
                 System.out.println("Entrez un numéro de groupe valide.");
+                reader.next();
             }
         }
         return utilisateur;
